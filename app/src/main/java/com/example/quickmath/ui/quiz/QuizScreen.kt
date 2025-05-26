@@ -22,6 +22,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.quickmath.domain.model.Answer
 
 @Composable
 fun QuizScreen(
@@ -33,9 +34,9 @@ fun QuizScreen(
     Scaffold() {
         QuizScreenView(
             modifier = Modifier.padding(it),
-            question = question,
-            answers = answers.map {answer -> "$answer" },
-            onAnswer = { viewModel.onAnswer() }
+            question = question.template,
+            answers = answers,
+            onAnswer = {answer -> viewModel.onAnswer(answer) }
         )
     }
 }
@@ -44,8 +45,8 @@ fun QuizScreen(
 fun QuizScreenView(
     modifier: Modifier = Modifier,
     question: String = "",
-    answers: List<String> = emptyList(),
-    onAnswer: () -> Unit = {}
+    answers: List<Answer> = emptyList(),
+    onAnswer: (answer: Answer) -> Unit = {}
 ) {
     Column {
         Box(
@@ -72,24 +73,24 @@ fun QuizScreenView(
                             if(answers.size > (i * 2)){
                                 answers[i * 2].let {
                                     Button(
-                                        onClick = { onAnswer() },
+                                        onClick = { onAnswer(it) },
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .fillMaxHeight(0.5f)
                                     ) {
-                                        Text(text = it)
+                                        Text(text = it.value.toString())
                                     }
                                 }
                             }
                             if(answers.size > ((i * 2) + 1)){
                                 answers[(i * 2) + 1].let {
                                     Button(
-                                        onClick = { onAnswer() },
+                                        onClick = { onAnswer(it) },
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .fillMaxHeight()
                                     ) {
-                                        Text(text = it)
+                                        Text(text = it.value.toString())
                                     }
                                 }
                             }
@@ -110,7 +111,12 @@ fun QuizScreenView(
 fun QuizScreenPreview() {
     QuizScreenView(
         question = "1 + 2",
-        answers = listOf("1", "2", "3", "4"),
+        answers = listOf(
+            Answer(3),
+            Answer(4),
+            Answer(5),
+            Answer(6)
+        ),
         onAnswer = {}
     )
 }

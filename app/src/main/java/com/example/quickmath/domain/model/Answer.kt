@@ -1,4 +1,3 @@
 package com.example.quickmath.domain.model
 
-interface Answer {
-}
+class Answer(val value: Int)
