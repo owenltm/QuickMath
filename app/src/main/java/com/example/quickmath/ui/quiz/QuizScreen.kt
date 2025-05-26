@@ -23,6 +23,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.quickmath.domain.model.Answer
+import com.example.quickmath.ui.quiz.composables.AnswerView
+import com.example.quickmath.ui.quiz.composables.QuestionView
 
 @Composable
 fun QuizScreen(
@@ -53,9 +55,8 @@ fun QuizScreenView(
             modifier = modifier
                 .fillMaxWidth()
                 .fillMaxHeight(0.7f),
-            contentAlignment = Alignment.Center
         ) {
-            Text(text = question, textAlign = TextAlign.Center)
+            QuestionView(questionText = question)
         }
         Box(modifier = Modifier.fillMaxHeight()) {
             Row(
@@ -72,26 +73,20 @@ fun QuizScreenView(
                         ) {
                             if(answers.size > (i * 2)){
                                 answers[i * 2].let {
-                                    Button(
+                                    AnswerView(
+                                        modifier = Modifier.fillMaxWidth().fillMaxHeight(0.5f),
                                         onClick = { onAnswer(it) },
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .fillMaxHeight(0.5f)
-                                    ) {
-                                        Text(text = it.value.toString())
-                                    }
+                                        answerText = it.value.toString()
+                                    )
                                 }
                             }
                             if(answers.size > ((i * 2) + 1)){
                                 answers[(i * 2) + 1].let {
-                                    Button(
+                                    AnswerView(
+                                        modifier = Modifier.fillMaxWidth().fillMaxHeight(1f),
                                         onClick = { onAnswer(it) },
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .fillMaxHeight()
-                                    ) {
-                                        Text(text = it.value.toString())
-                                    }
+                                        answerText = it.value.toString()
+                                    )
                                 }
                             }
                         }
