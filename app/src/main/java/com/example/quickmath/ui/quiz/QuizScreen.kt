@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,12 +31,14 @@ import com.example.quickmath.ui.quiz.composables.QuestionView
 fun QuizScreen(
     viewModel: QuizScreenViewModel = viewModel(factory = QuizScreenViewModelFactory())
 ) {
+    val time by viewModel.timer.collectAsState()
     val question by viewModel.question.collectAsState()
     val answers by viewModel.answers.collectAsState()
 
     Scaffold() {
         QuizScreenView(
             modifier = Modifier.padding(it),
+            time = time,
             question = question.template,
             answers = answers,
             onAnswer = {answer -> viewModel.onAnswer(answer) }
@@ -46,47 +49,66 @@ fun QuizScreen(
 @Composable
 fun QuizScreenView(
     modifier: Modifier = Modifier,
+    time: Int = 0,
     question: String = "",
     answers: List<Answer> = emptyList(),
     onAnswer: (answer: Answer) -> Unit = {}
 ) {
-    Column {
-        Box(
-            modifier = modifier
-                .fillMaxWidth()
-                .fillMaxHeight(0.7f),
+    Scaffold {
+        Column(
+            modifier = Modifier.padding(it)
         ) {
-            QuestionView(questionText = question)
-        }
-        Box(modifier = Modifier.fillMaxHeight()) {
             Row(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(bottom = 16.dp, start = 16.dp, end = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
             ) {
-                if (answers.isNotEmpty()) {
-                    for (i in 0..(answers.size - 1) / 2) {
-                        Column(
-                            modifier = Modifier.weight(1f),
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
-                            if(answers.size > (i * 2)){
-                                answers[i * 2].let {
-                                    AnswerView(
-                                        modifier = Modifier.fillMaxWidth().fillMaxHeight(0.5f),
-                                        onClick = { onAnswer(it) },
-                                        answerText = it.value.toString()
-                                    )
+                Text(
+                    text = time.toString(),
+                    style = MaterialTheme.typography.titleLarge,
+                    textAlign = TextAlign.Center
+                )
+            }
+            Box(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(0.7f),
+            ) {
+                QuestionView(questionText = question)
+            }
+            Box(modifier = Modifier.fillMaxHeight()) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(bottom = 16.dp, start = 16.dp, end = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    if (answers.isNotEmpty()) {
+                        for (i in 0..(answers.size - 1) / 2) {
+                            Column(
+                                modifier = Modifier.weight(1f),
+                                verticalArrangement = Arrangement.spacedBy(16.dp)
+                            ) {
+                                if (answers.size > (i * 2)) {
+                                    answers[i * 2].let {
+                                        AnswerView(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .fillMaxHeight(0.5f),
+                                            onClick = { onAnswer(it) },
+                                            answerText = it.value.toString()
+                                        )
+                                    }
                                 }
-                            }
-                            if(answers.size > ((i * 2) + 1)){
-                                answers[(i * 2) + 1].let {
-                                    AnswerView(
-                                        modifier = Modifier.fillMaxWidth().fillMaxHeight(1f),
-                                        onClick = { onAnswer(it) },
-                                        answerText = it.value.toString()
-                                    )
+                                if (answers.size > ((i * 2) + 1)) {
+                                    answers[(i * 2) + 1].let {
+                                        AnswerView(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .fillMaxHeight(1f),
+                                            onClick = { onAnswer(it) },
+                                            answerText = it.value.toString()
+                                        )
+                                    }
                                 }
                             }
                         }
