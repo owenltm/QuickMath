@@ -11,50 +11,104 @@ import com.example.quickmath.domain.model.Question
 import com.example.quickmath.domain.model.SubtractionQuestion
 import com.example.quickmath.utils.getNumbersAsList
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+data class QuizScreenState(
+    val isGameRunning: Boolean = false,
+    val time: Int = 0,
+    val score: Int = 0,
+    val question: Question = EmptyQuestion(),
+    val answers: List<Answer> = emptyList<Answer>()
+)
+
+sealed class QuizScreenEvent {
+    data class GameOverEvent(val message: String) : QuizScreenEvent()
+    data class QuestionAnsweredEvent(val isCorrect: Boolean) : QuizScreenEvent()
+}
+
 class QuizScreenViewModel: ViewModel() {
-    private var _timer = MutableStateFlow<Int>(0);
-    val timer = _timer.asStateFlow()
+    private var _state = MutableStateFlow<QuizScreenState>(QuizScreenState())
+    val state = _state.asStateFlow()
 
-    private var _question = MutableStateFlow<Question>(EmptyQuestion())
-    val question = _question.asStateFlow()
-
-    private var _answers = MutableStateFlow(listOf<Answer>())
-    val answers = _answers.asStateFlow()
+    private var _gameResult = MutableSharedFlow<String>()
+    val gameResult = _gameResult.asSharedFlow()
 
     init {
+        startGame()
+    }
+
+    fun startGame() {
+        _state.update {
+            it.copy(
+                isGameRunning = true
+            )
+        }
         generateQuestion()
         startTimer()
     }
 
+    fun stopGame() {
+        _state.update {
+            it.copy(
+                isGameRunning = false
+            )
+        }
+
+        viewModelScope.launch {
+            _gameResult.emit("Game Over")
+        }
+    }
+
     fun startTimer(){
-        _timer.value = 10
+        _state.update {
+            it.copy(
+                time = 15
+            )
+        }
         viewModelScope.launch {
             tickTimer()
         }
     }
 
     fun increaseTimer(){
-        _timer.value = _timer.value + 3
+        _state.update {
+            it.copy(
+                time = it.time + 3
+            )
+        }
     }
 
     fun decreaseTimer(){
-        _timer.value = _timer.value - 1
+        _state.update {
+            it.copy(
+                time = it.time - 3
+            )
+        }
     }
 
     suspend fun tickTimer(){
-        while (_timer.value > 0){
+        while (state.value.time > 0 && state.value.isGameRunning) {
+            _state.update {
+                it.copy(
+                    time = it.time - 1
+                )
+            }
             delay(1000)
-            _timer.value = _timer.value - 1
+        }
+
+        if (state.value.time <= 0) {
+            stopGame()
         }
     }
 
     fun onAnswer(answer: Answer) {
-        val isCorrect = _question.value.validate(answer)
-        val isHaveTime = _timer.value > 0
+        val isCorrect = state.value.question.validate(answer)
+        val isHaveTime = state.value.time > 0
 
         if(!isHaveTime){
             return
@@ -76,15 +130,24 @@ class QuizScreenViewModel: ViewModel() {
     private fun generateQuestion() {
         val operator = (Math.random() * 10).toInt()
 
-        // TODO: UPDATE ANSWER VALUE AS 1 STATE UPDATE
         when(operator % 2){
             0 -> {
-                _question.value = AdditionQuestion(getNumbersAsList(2))
-                _answers.value = question.value.answers
+                _state.update { it ->
+                    val newQuestion = AdditionQuestion(getNumbersAsList(2))
+                    it.copy(
+                        question = newQuestion,
+                        answers = newQuestion.answers
+                    )
+                }
             }
             else -> {
-                _question.value = SubtractionQuestion(getNumbersAsList(2))
-                _answers.value = question.value.answers
+                _state.update { it ->
+                    val newQuestion = SubtractionQuestion(getNumbersAsList(2))
+                    it.copy(
+                        question = newQuestion,
+                        answers = newQuestion.answers
+                    )
+                }
             }
         }
 

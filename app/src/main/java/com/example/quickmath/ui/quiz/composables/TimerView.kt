@@ -2,7 +2,8 @@ package com.example.quickmath.ui.quiz.composables
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -13,46 +14,43 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.quickmath.ui.theme.QuickMathTheme
 
 @Composable
-fun QuestionView(
+fun TimerView(
     modifier: Modifier = Modifier,
-    questionText: String = "",
+    time: String
 ) {
-    return Box(
-        modifier = modifier
+    Box(
+        modifier = Modifier
+            .aspectRatio(1f)
             .background(
-                MaterialTheme.colorScheme.primaryContainer,
-                shape = RoundedCornerShape(32.dp)
+                MaterialTheme.colorScheme.tertiary,
+                shape = RoundedCornerShape(16.dp)
             )
-            .fillMaxSize(),
+            .padding(8.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(
-            questionText,
-            textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.displayLarge.copy(
-                fontSize = 100.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSecondaryContainer
-            )
+            text = time,
+            style = MaterialTheme.typography.titleLarge.copy(
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.tertiaryContainer
+            ),
+            textAlign = TextAlign.Center
         )
     }
 }
 
 @Preview(
     showBackground = true,
-    heightDp = 500,
-    widthDp = 500,
-    name = "QuestionViewLight"
+    name = "TimerViewLight"
 )
 @Composable
-fun QuestionViewPreview() {
+fun TimerViewPreview() {
     QuickMathTheme {
-        QuestionView(
-            questionText = "1 + 1"
+        TimerView(
+            time = "10"
         )
     }
 }

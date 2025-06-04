@@ -9,38 +9,39 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.quickmath.domain.model.Answer
 import com.example.quickmath.ui.quiz.composables.AnswerView
 import com.example.quickmath.ui.quiz.composables.QuestionView
+import com.example.quickmath.ui.quiz.composables.TimerView
+import com.example.quickmath.ui.theme.QuickMathTheme
 
 @Composable
 fun QuizScreen(
     viewModel: QuizScreenViewModel = viewModel(factory = QuizScreenViewModelFactory())
 ) {
-    val time by viewModel.timer.collectAsState()
-    val question by viewModel.question.collectAsState()
-    val answers by viewModel.answers.collectAsState()
+    val state by viewModel.state.collectAsState()
+
+    LaunchedEffect(key1 = Unit) {
+        viewModel.gameResult.collect { event ->
+            Log.d("QuizScreen", "Game result: ${event}")
+        }
+    }
 
     Scaffold() {
         QuizScreenView(
             modifier = Modifier.padding(it),
-            time = time,
-            question = question.template,
-            answers = answers,
+            time = state.time,
+            question = state.question.template,
+            answers = state.answers,
             onAnswer = {answer -> viewModel.onAnswer(answer) }
         )
     }
@@ -58,22 +59,26 @@ fun QuizScreenView(
         Column(
             modifier = Modifier.padding(it)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = time.toString(),
-                    style = MaterialTheme.typography.titleLarge,
-                    textAlign = TextAlign.Center
-                )
-            }
             Box(
                 modifier = modifier
+                    .padding(16.dp)
                     .fillMaxWidth()
                     .fillMaxHeight(0.7f),
             ) {
                 QuestionView(questionText = question)
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Box(
+                        modifier = Modifier.fillMaxWidth(0.2f),
+                    ) {
+                        TimerView(time = time.toString())
+                    }
+                }
             }
             Box(modifier = Modifier.fillMaxHeight()) {
                 Row(
@@ -126,14 +131,17 @@ fun QuizScreenView(
 )
 @Composable
 fun QuizScreenPreview() {
-    QuizScreenView(
-        question = "1 + 2",
-        answers = listOf(
-            Answer(3),
-            Answer(4),
-            Answer(5),
-            Answer(6)
-        ),
-        onAnswer = {}
-    )
+    QuickMathTheme {
+        QuizScreenView(
+            question = "1 + 2",
+            time = 15,
+            answers = listOf(
+                Answer(3),
+                Answer(4),
+                Answer(5),
+                Answer(6)
+            ),
+            onAnswer = {}
+        )
+    }
 }
