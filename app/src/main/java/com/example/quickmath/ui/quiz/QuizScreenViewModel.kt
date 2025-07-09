@@ -6,7 +6,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.quickmath.domain.model.AdditionQuestion
 import com.example.quickmath.domain.model.Answer
+import com.example.quickmath.domain.model.DivisionQuestion
 import com.example.quickmath.domain.model.EmptyQuestion
+import com.example.quickmath.domain.model.MultiplicationQuestion
 import com.example.quickmath.domain.model.Question
 import com.example.quickmath.domain.model.SubtractionQuestion
 import com.example.quickmath.utils.getNumbersAsList
@@ -26,6 +28,7 @@ data class QuizScreenState(
     val answers: List<Answer> = emptyList<Answer>()
 )
 
+// TODO: MAYBE TRY USING MVI FOR THIS SCREEN (?)
 sealed class QuizScreenEvent {
     data class GameOverEvent(val message: String) : QuizScreenEvent()
     data class QuestionAnsweredEvent(val isCorrect: Boolean) : QuizScreenEvent()
@@ -75,20 +78,22 @@ class QuizScreenViewModel: ViewModel() {
         }
     }
 
-    fun increaseTimer(){
+    fun increaseTimer(value: Int = 1) {
         _state.update {
             it.copy(
-                time = it.time + 3
+                time = it.time + value
             )
         }
+        Log.d("TIMER", "Increase Timer by ${value}")
     }
 
-    fun decreaseTimer(){
+    fun decreaseTimer(value: Int = 1) {
         _state.update {
             it.copy(
-                time = it.time - 3
+                time = it.time - value
             )
         }
+        Log.d("TIMER", "Decrease Timer by ${value}")
     }
 
     suspend fun tickTimer(){
@@ -116,19 +121,26 @@ class QuizScreenViewModel: ViewModel() {
 
         generateQuestion()
         if(isCorrect){
-            increaseTimer()
-            Log.d("QuizScreenViewModel", "Correct answer")
+            _state.update {
+                it.copy(
+                    score = it.score + 1
+                )
+            }
+
+            val reward = 5 - (5 * state.value.score / 20f)
+
+            increaseTimer(value = 5.coerceAtMost(reward.toInt()))
         } else {
-            decreaseTimer()
+            val penalty = 5 * state.value.score / 10f
 
-
-            
-            Log.d("QuizScreenViewModel", "Incorrect answer")
+            decreaseTimer(value = 1.coerceAtLeast(penalty.toInt()))
         }
     }
 
     private fun generateQuestion() {
         val operator = (Math.random() * 10).toInt()
+
+//        val level = if(state.value.score < 5) 2 else 4
 
         when(operator % 2){
             0 -> {
@@ -140,7 +152,7 @@ class QuizScreenViewModel: ViewModel() {
                     )
                 }
             }
-            else -> {
+            1 -> {
                 _state.update { it ->
                     val newQuestion = SubtractionQuestion(getNumbersAsList(2))
                     it.copy(
@@ -148,6 +160,29 @@ class QuizScreenViewModel: ViewModel() {
                         answers = newQuestion.answers
                     )
                 }
+            }
+
+            2 -> {
+                _state.update { it ->
+                    val newQuestion = MultiplicationQuestion(getNumbersAsList(2))
+                    it.copy(
+                        question = newQuestion,
+                        answers = newQuestion.answers
+                    )
+                }
+            }
+
+            3 -> {
+                _state.update { it ->
+                    val newQuestion = DivisionQuestion(getNumbersAsList(2))
+                    it.copy(
+                        question = newQuestion,
+                        answers = newQuestion.answers
+                    )
+                }
+            }
+            else -> {
+
             }
         }
 

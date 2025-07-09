@@ -60,3 +60,25 @@ class SubtractionQuestion(override val parameters: List<Int>) : Question {
         return Answer(parameters[0] - parameters[1])
     }
 }
+
+class MultiplicationQuestion(override val parameters: List<Int>) : Question {
+    override val template: String
+        get() = String.format("%s x %s", parameters[0], parameters[1])
+
+    override var answers: List<Answer> = generateAnswers()
+
+    override fun getFinalAnswer(): Answer {
+        return Answer(parameters[0] * parameters[1])
+    }
+}
+
+class DivisionQuestion(override val parameters: List<Int>) : Question {
+    override val template: String
+        get() = String.format("%s / %s", parameters[0], parameters[1])
+
+    override var answers: List<Answer> = generateAnswers()
+
+    override fun getFinalAnswer(): Answer {
+        return Answer(parameters[0] / parameters[1])
+    }
+}
