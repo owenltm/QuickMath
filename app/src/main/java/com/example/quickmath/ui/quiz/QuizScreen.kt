@@ -26,6 +26,7 @@ import com.example.quickmath.ui.theme.QuickMathTheme
 
 @Composable
 fun QuizScreen(
+    onNavigateToStartMenu: () -> Unit = {},
     viewModel: QuizScreenViewModel = viewModel(factory = QuizScreenViewModelFactory())
 ) {
     val state by viewModel.state.collectAsState()
@@ -57,10 +58,10 @@ fun QuizScreenView(
 ) {
     Scaffold {
         Column(
-            modifier = Modifier.padding(it)
+            modifier = modifier.padding(it)
         ) {
             Box(
-                modifier = modifier
+                modifier = Modifier
                     .padding(16.dp)
                     .fillMaxWidth()
                     .fillMaxHeight(0.7f),

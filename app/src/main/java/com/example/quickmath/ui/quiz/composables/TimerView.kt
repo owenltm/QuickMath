@@ -22,7 +22,7 @@ fun TimerView(
     time: String
 ) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .aspectRatio(1f)
             .background(
                 MaterialTheme.colorScheme.tertiary,
